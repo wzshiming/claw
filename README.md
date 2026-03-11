@@ -35,18 +35,21 @@ docker pull ghcr.io/wzshiming/claw/openclaw:latest
 ```bash
 docker run -d \
   --name openclaw \
-  -v ~/.openclaw:/root/.openclaw \
+  -v ~/.openclaw:/home/node/.openclaw \
   -p 18789:18789 \
-  -p 3000:3000 \
   --restart unless-stopped \
-  ghcr.io/wzshiming/claw/openclaw:latest
+  ghcr.io/wzshiming/claw/openclaw:latest \
+  node openclaw.mjs gateway --bind lan --allow-unconfigured
 ```
 
 This will:
 - Run OpenClaw in detached mode
 - Mount `~/.openclaw` for persistent configuration
-- Expose port 18789 (Gateway control plane) and 3000 (Web UI)
+- Expose port 18789 (Gateway WebSocket control plane and Web UI)
+- Bind to all interfaces (`--bind lan`) so it's accessible from the host
 - Automatically restart the container unless manually stopped
+
+**Note:** The `--bind lan` flag is required to make the gateway accessible from outside the container. For production use, configure authentication credentials.
 
 ### Step 3: Initial Setup
 
@@ -61,12 +64,14 @@ The wizard will guide you through:
 2. Setting up messaging channels
 3. Configuring workspace and skills
 
-### Step 4: Access the Web UI
+### Step 4: Access the Control UI
 
 Once configured, access the OpenClaw Control UI at:
 ```
-http://localhost:3000
+http://localhost:18789
 ```
+
+The Gateway serves both the WebSocket control plane and the Web UI (Control UI and WebChat) on the same port.
 
 ### Basic Usage
 
@@ -92,13 +97,12 @@ You can configure OpenClaw using environment variables:
 ```bash
 docker run -d \
   --name openclaw \
-  -v ~/.openclaw:/root/.openclaw \
+  -v ~/.openclaw:/home/node/.openclaw \
   -p 18789:18789 \
-  -p 3000:3000 \
   -e OPENAI_API_KEY=your_api_key_here \
-  -e OPENCLAW_PORT=18789 \
   --restart unless-stopped \
-  ghcr.io/wzshiming/claw/openclaw:latest
+  ghcr.io/wzshiming/claw/openclaw:latest \
+  node openclaw.mjs gateway --bind lan --allow-unconfigured
 ```
 
 ### Stopping and Removing
