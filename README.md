@@ -16,22 +16,104 @@ The Docker image is automatically built from the official OpenClaw repository an
 ghcr.io/wzshiming/claw/openclaw:latest
 ```
 
-## Using the Docker Image
+## Quick Start
 
-### Running the Container
+### Prerequisites
+
+Before running OpenClaw, you'll need:
+- An OpenAI API key (or other supported AI model provider)
+- (Optional) Credentials for messaging platforms you want to connect (WhatsApp, Telegram, Slack, Discord, etc.)
+
+### Step 1: Pull the Image
 
 ```bash
-# Pull the image
 docker pull ghcr.io/wzshiming/claw/openclaw:latest
+```
 
-# Run the container
-docker run -it --rm \
+### Step 2: Run the Container
+
+```bash
+docker run -d \
+  --name openclaw \
   -v ~/.openclaw:/root/.openclaw \
+  -p 18789:18789 \
   -p 3000:3000 \
+  --restart unless-stopped \
   ghcr.io/wzshiming/claw/openclaw:latest
 ```
 
-For detailed setup and configuration instructions, please refer to the [official OpenClaw documentation](https://docs.openclaw.ai).
+This will:
+- Run OpenClaw in detached mode
+- Mount `~/.openclaw` for persistent configuration
+- Expose port 18789 (Gateway control plane) and 3000 (Web UI)
+- Automatically restart the container unless manually stopped
+
+### Step 3: Initial Setup
+
+After starting the container, run the onboarding wizard:
+
+```bash
+docker exec -it openclaw openclaw onboard
+```
+
+The wizard will guide you through:
+1. Configuring your AI model (OpenAI, Anthropic, etc.)
+2. Setting up messaging channels
+3. Configuring workspace and skills
+
+### Step 4: Access the Web UI
+
+Once configured, access the OpenClaw Control UI at:
+```
+http://localhost:3000
+```
+
+### Basic Usage
+
+**Send a message to the assistant:**
+```bash
+docker exec -it openclaw openclaw agent --message "Hello, how are you?"
+```
+
+**Check gateway status:**
+```bash
+docker exec -it openclaw openclaw gateway status
+```
+
+**View logs:**
+```bash
+docker logs openclaw -f
+```
+
+### Environment Variables
+
+You can configure OpenClaw using environment variables:
+
+```bash
+docker run -d \
+  --name openclaw \
+  -v ~/.openclaw:/root/.openclaw \
+  -p 18789:18789 \
+  -p 3000:3000 \
+  -e OPENAI_API_KEY=your_api_key_here \
+  -e OPENCLAW_PORT=18789 \
+  --restart unless-stopped \
+  ghcr.io/wzshiming/claw/openclaw:latest
+```
+
+### Stopping and Removing
+
+```bash
+# Stop the container
+docker stop openclaw
+
+# Remove the container
+docker rm openclaw
+
+# Your configuration in ~/.openclaw will be preserved
+```
+
+For detailed setup and advanced configuration, please refer to the [official OpenClaw documentation](https://docs.openclaw.ai).
 
 ## CI/CD Workflow
 
