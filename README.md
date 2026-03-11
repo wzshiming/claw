@@ -39,7 +39,7 @@ docker run -d \
   -p 18789:18789 \
   --restart unless-stopped \
   ghcr.io/wzshiming/claw/openclaw:latest \
-  node openclaw.mjs gateway --bind lan --allow-unconfigured
+  openclaw gateway --bind lan --allow-unconfigured
 ```
 
 This will:
